@@ -3204,9 +3204,9 @@ YWNoZS9vcm8vdXRpbC9DYWNoZVJhbmRvbS5jbGFzc1BLBQYAAAAASgBKAHgYAABf5gAAAAA=
 </javaproject>
 </code>
 <item name="$JavaCompilerSource">
-<text>1.6</text>
+<text>1.8</text>
 </item>
 <item name="$JavaCompilerTarget">
-<text>1.6</text>
+<text>1.8</text>
 </item>
 </scriptlibrary>
