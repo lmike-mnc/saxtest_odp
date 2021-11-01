@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?><view xmlns="http://www.lotus.com/dxl" name="Ref" showinmenu="false" noreplace="true" publicaccess="false" unreadmarks="none" onopengoto="lastopened" onrefresh="displayindicator" headers="beveled" opencollapsed="false" showresponsehierarchy="true" showmargin="true" shrinkrows="false" extendlastcolumn="false" showhierarchies="false" unreadcolor="black" rowlinecount="1" headerlinecount="1" rowspacing="1" bgcolor="white" totalscolor="black" headerbgcolor="white" boldunreadrows="false" evaluateactions="false" allownewdocuments="false" allowcustomizations="true" hidemarginborder="false" marginwidth="0px" marginbgcolor="white" uniquekeys="false">
+<noteinfo unid="265DA8BD8EB9461043257E740039F09A"/>
+
+<code event="selection">
+<formula>SELECT form="test"</formula>
+</code>
+<column hidedetailrows="false" itemname="$1" width="10" resizable="true" separatemultiplevalues="false" sortnoaccent="true" sortnocase="true" showaslinks="false" twisties="true">
+<columnheader title="#">
+<font size="9pt" style="bold"/>
+</columnheader>
+<code event="value">
+<formula>FIELD $Ref:=refs1:refs2;
+@If(@IsResponseDoc;"..."+name;name)</formula>
+</code>
+</column>
+<column hidedetailrows="false" itemname="$3" width="10" resizable="true" separatemultiplevalues="false" sortnoaccent="false" sortnocase="true" showaslinks="false" responsesonly="true">
+<columnheader>
+<font size="9pt" style="bold"/>
+</columnheader>
+<code event="value">
+<formula>refs1:refs2</formula>
+</code>
+</column>
+</view>

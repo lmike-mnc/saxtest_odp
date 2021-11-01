@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?><note xmlns="http://www.lotus.com/dxl" class="filter">
+<noteinfo unid="BF8160869E66F80E43257E8100443D88"/>
+
+
+
+
+<item name="$TITLE" sign="true">
+<text>AttachmentUtils</text>
+</item>
+<item name="$Flags">
+<text>s34Q</text>
+</item>
+<item name="$PublicAccess" sign="true">
+<text>1</text>
+</item>
+
+
+<item name="$Comment">
+<text>аттачи в документах</text>
+</item>
+</note>

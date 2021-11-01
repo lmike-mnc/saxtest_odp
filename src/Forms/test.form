@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?><form xmlns="http://www.lotus.com/dxl" name="test" alias="test" publicaccess="false" default="true" renderpassthrough="true">
+<noteinfo unid="AD5E5E707FB15D0C43257E68004B8E4F"/>
+
+
+<globals>
+<code event="options">
+<lotusscript>Option Public
+Option Declare
+Use "AttachmentUtils"
+
+</lotusscript>
+</code>
+</globals>
+<code event="querysave">
+<lotusscript>Sub Querysave(Source As Notesuidocument, Continue As Variant)
+	Continue=True
+	Set Source=UpdateUIdoc(Source, {body})
+	If HasAttachmentName(Source.Document, {*.docx}) Then Msgbox {Attach is not valid}:Continue=False:Exit Sub
+	Source.Document.Save True, False
+	Call PostSave(Source)
+End Sub
+</lotusscript>
+</code>
+<code event="postsave">
+<lotusscript>Sub Postsave(Source As Notesuidocument)
+	Print {PS Event}
+End Sub
+</lotusscript>
+</code>
+<code event="queryclose">
+<lotusscript>Sub Queryclose(Source As Notesuidocument, Continue As Variant)
+	Print {QC Event}
+End Sub</lotusscript>
+</code>
+<actionbar bgcolor="#d4d0c8" bordercolor="black">
+<actionbuttonstyle bgcolor="#d4d0c8"/>
+<font color="system"/>
+<border style="solid" width="0px 0px 1px"/>
+<action title="over32">
+<code event="options">
+<lotusscript>Option Declare
+
+</lotusscript>
+</code>
+<code event="declarations">
+<lotusscript>Const BIG=17000
+</lotusscript>
+</code>
+<code event="click">
+<lotusscript>Sub Click(Source As Button)
+	On Error Goto ErrH
+	Dim ses As New NotesSession, wks As New NotesUIWorkspace
+	Dim doc As NotesDocument
+	Set doc=wks.CurrentDocument.Document
+	Dim v
+	v=Split({,},{,})
+	Dim item As New NotesItem(doc,{over32},v)
+	item.IsSummary=False
+	v(0)=Ustring(BIG, "*chars")
+	v(1)=Ustring(BIG, "*chars")
+	item.Values=v
+	item.IsSummary=True
+	Set item=doc.ReplaceItemValue({SaveOptions},{00})
+	item.SaveToDisk=False
+	Call doc.Save(True, False)
+	wks.CurrentDocument.Close True
+Quit:
+	Exit Sub
+ErrH:
+	Error Err, "Got error " &amp; Error$ &amp; " on line " &amp; Cstr(Erl)
+End Sub</lotusscript>
+</code>
+<code event="label">
+<formula>"over32"</formula>
+</code>
+</action>
+</actionbar>
+<body>
+<richtext>
+<pardef id="1"/>
+<par def="1">
+<field type="text" kind="editable" name="name"/>
+<compositedata type="98" prevtype="65418" nexttype="222" afterparcount="7" containertype="65418" aftercontainercount="1" afterbegincount="3">
+Yg4BAIQAAAAAAAAAAAA=
+</compositedata>
+</par>
+<par def="1">
+<field type="text" kind="editable" name="email"/>
+<compositedata type="98" prevtype="65418" nexttype="222" afterparcount="6" containertype="65418" aftercontainercount="1" afterbegincount="3">
+Yg4BAIQAAAAAAAAAAAA=
+</compositedata>
+</par>
+<par def="1">
+<run>
+<font style="bold"/>RT</run>
+</par>
+<par def="1">
+<field type="richtext" kind="editable" name="body"/>
+<compositedata type="98" prevtype="65418" nexttype="222" afterparcount="6" containertype="65418" aftercontainercount="1" afterbegincount="3">
+Yg4BAIQAAAAAAAEAAAA=
+</compositedata>
+</par>
+</richtext>
+</body>
+</form>

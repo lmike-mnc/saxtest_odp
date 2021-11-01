@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?><agent xmlns="http://www.lotus.com/dxl" name="testSaxForFiles" hide="v3" publicaccess="false">
+<noteinfo unid="B4B2795459E3A7EDC32570E70064012A"/>
+
+
+
+<trigger type="actionsmenu"/>
+<documentset type="selected"/>
+<code event="action">
+<javaproject class="JavaAgent.class">
+<java name="JavaAgent.java">/*****************************************************************************************
+Материалы для чтения - если кто захочет разобраться, как это постигалось
+
+кодировка байтового потока:
+http://www.javaportal.ru/java/articles/ruschars/ruschars.html
+
+SAX для ленивых:
+http://www.javable.com/javaworld/04_00/01/
+отсюда брал код
+
+использование ZIP:
+http://searchdomino.techtarget.com/tip/1,289483,sid4_gci1002690,00.html
+(нужна регистрация - бесплатно)
+
+Base64 Encoder/Decoder:
+http://iharder.sourceforge.net/base64/
+
+Апачевский SAX процессор:
+http://xerces.apache.org/xerces2-j/download.cgi
+(необходимые модули включены в проект)
+
+благдарности за мои "потуги" апришиатятся (т.е. приветствуются) :))
+
+С наступающим вас всех - дорогие коллеги!!!
+
+30.12.2005
+С Уважением Михаил Чолоков (Mikhail Cholokov)
+*****************************************************************************************/
+import lotus.domino.*;
+import java.io.*;
+
+public class JavaAgent extends AgentBase {
+    Thread thread1;
+    Thread thread2;
+
+    public void NotesMain() {
+
+        try {
+            Session session = getSession();
+            AgentContext agentContext = session.getAgentContext();
+
+            // (Your code goes here)
+            Document doc = agentContext.getDocumentContext();
+
+            StringBuffer binPath = new StringBuffer(session
+                    .getEnvironmentString("NotesProgram", true));
+            if (binPath.length() == 0) {
+                String sttmp = session.getEnvironmentString("Directory", true);
+                binPath.append(session.getEnvironmentString("Directory", true));
+                if (binPath.charAt(binPath.length() - 1) == File.separatorChar)
+                    binPath.setLength(binPath.length() - 1);
+                binPath.setLength(binPath.toString().lastIndexOf(
+                        File.separatorChar));
+            }
+            System.out.println("Program Path:" + binPath.toString());
+            PipedInputStream in = new PipedInputStream();
+            final PipedOutputStream out = new PipedOutputStream(in);
+            thread1 = new NotesThread(new DataSource(doc, out));// new FileOutputStream("./out.dxl")));
+            thread1.start();
+            thread2 = new NotesThread(new DataConsumer(in));// new FileInputStream("./out.dxl")));
+            thread2.start();
+            //thread2.join();
+            //thread1.join();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                thread2.join();
+                thread1.join();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+}
+
+</java>
+<sharedlibraryref name="utilsLibrary"/>
+</javaproject>
+</code>
+
+<item name="$JavaCompilerSource">
+<text>1.6</text>
+</item>
+<item name="$JavaCompilerTarget">
+<text>1.6</text>
+</item>
+</agent>

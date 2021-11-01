@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?><agent xmlns="http://www.lotus.com/dxl" name="XSLT" hide="v3" publicaccess="false">
+<noteinfo unid="62049CCFCA57194743257E4C00365A52"/>
+
+
+
+<trigger type="actionsmenu"/>
+<documentset type="runonce"/>
+<code event="options">
+<lotusscript>%REM
+*********************************************
+	Agent XSLT
+	Created May 21, 2015 by Mikhail Cholokov/CRUINTERNET
+	Description: Comments for Agent
+%END REM
+Option Public
+Option Declare
+
+Use "ErrorHandling"
+
+</lotusscript>
+</code>
+<code event="declarations">
+<lotusscript>Const xml=_
+|&lt;htmlx xmlns="http://www.w3.org/1999/xhtml"&gt;&lt;RootElement1&gt;
+        &lt;Element2 Type="S2"&gt;123&lt;/Element2&gt;
+        &lt;Element3 attr1="1"&gt;
+            node text
+            &lt;E4 attr2="2"&gt;44444&lt;E4sub&gt;4sub&lt;/E4sub&gt;&lt;/E4&gt;
+            &lt;E5&gt;5555&lt;/E5&gt;
+        &lt;/Element3&gt;
+        &lt;Element6&gt;66666&lt;/Element6&gt;
+&lt;/RootElement1&gt;&lt;/htmlx&gt;|
+'xmlns:xs="http://www.w3.org/2001/XMLSchema"
+'exclude-result-prefixes="xs"
+Const xsl=_
+|&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns:xx="http://www.w3.org/1999/xhtml"
+    exclude-result-prefixes="xs xx"&gt;
+    &lt;xsl:output method="xml" version="1.0" omit-xml-declaration="yes" indent="yes"/&gt;
+    &lt;xsl:template match="xx:RootElement1"&gt;
+            &lt;xsl:apply-templates select="xx:Element3"/&gt;
+    &lt;/xsl:template&gt;
+    &lt;xsl:template match="xx:Element3"&gt;
+        &lt;!--&lt;xsl:copy-of select="."/&gt;--&gt;
+        &lt;xsl:copy-of select="*"/&gt;
+    &lt;/xsl:template&gt;
+&lt;/xsl:stylesheet&gt;|
+Const xsl_ns=_
+|&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"&gt;
+  &lt;xsl:output method="xml" indent="yes"/&gt;
+
+  &lt;xsl:template match="*"&gt;
+    &lt;xsl:element name="{local-name(.)}"&gt;|&amp;_
+      {&lt;xsl:apply-templates select="@* | node()"/&gt;}&amp;_
+|    &lt;/xsl:element&gt;
+  &lt;/xsl:template&gt;
+  &lt;xsl:template match="@*"&gt;
+    &lt;xsl:attribute name="{local-name(.)}"&gt;
+      &lt;xsl:value-of select="."/&gt;
+    &lt;/xsl:attribute&gt;
+  &lt;/xsl:template&gt;
+&lt;/xsl:stylesheet&gt;|
+Const xsl_hints=_
+|&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0"
+    xmlns:dxl='http://www.lotus.com/dxl'&gt;
+    &lt;xsl:output method='text'/&gt;
+    &lt;xsl:strip-space elements='*'/&gt;
+    &lt;xsl:template match='dxl:richtext'&gt;
+        &lt;xsl:apply-templates select="dxl:par/dxl:attachmentref"/&gt;
+    &lt;/xsl:template&gt;
+    &lt;xsl:template match='dxl:attachmentref'&gt;
+        &lt;xsl:value-of select="@name"/&gt;:&lt;xsl:value-of select="@displayname"/&gt;
+        &lt;xsl:text&gt;&amp;#10;&lt;/xsl:text&gt; &lt;!-- newline character --&gt;
+    &lt;/xsl:template&gt;
+    &lt;!-- Match all text that has not yet been picked up by the templates, and discard it. --&gt;
+    &lt;xsl:template match="text()"&gt;
+    &lt;/xsl:template&gt;
+&lt;/xsl:stylesheet&gt;|
+
+</lotusscript>
+</code>
+<code event="initialize">
+<lotusscript>Sub Initialize
+    'MsgBox Transform(xml,xsl)
+    Dim doc As NotesDocument, ses As New NotesSession
+    Set doc=ses.Documentcontext
+    MsgBox RTHints(doc)
+    'MsgBox Transform(Transform(xml,xsl),xsl_ns)
+End Sub
+
+
+</lotusscript>
+</code>
+<code event="DocHints">
+<lotusscript>%REM
+*--------------------------------------------
+    Function DocHints
+    Description: Comments for Function
+%END REM
+Function DocHints(doc As NotesDocument) As String
+    Dim routineName As String
+    routineName="DocHints"
+    On Error GoTo ErrH
+'your code here
+    Dim rt As NotesRichTextItem
+    ForAll itm In doc.Items
+        Dim tmp As NotesItem
+        Set tmp=itm
+        If tmp.Type=1 Then
+            
+        End If
+    End ForAll
+    'RThints=
+Quit:
+    Exit Function
+ErrH:
+    Error Err, RaiseError
+    Resume Quit
+End Function
+
+
+</lotusscript>
+</code>
+<code event="RThints">
+<lotusscript>%REM
+*--------------------------------------------
+	Function RThints
+	Description: Comments for Function
+%END REM
+Function RThints(doc As NotesDocument) As String
+    Dim routineName As String
+    routineName="RThints"
+    On Error GoTo ErrH
+    'your code here
+    Dim ses As New NotesSession, stream As NotesStream
+    Set stream=ses.Createstream()
+    Dim dxl As NotesDXLExporter
+    Set dxl=ses.Createdxlexporter()
+    dxl.Richtextoption=RICHTEXTOPTION_DXL
+    Call dxl.Setinput(doc)
+    Call dxl.SetOutput(stream)
+    dxl.Exitonfirstfatalerror=False
+    Call dxl.Process()
+    RThints=Transform(stream,xsl_hints)
+Quit:
+    Exit Function
+ErrH:
+    Error Err, RaiseError
+    Resume Quit
+End Function
+
+</lotusscript>
+</code>
+<code event="Transform">
+<lotusscript>%REM
+*--------------------------------------------
+	Function test
+	Description: Comments for Function
+%END REM
+function Transform(xml As Variant, xsl As String) As String
+    Dim routineName As String
+    routineName="test"
+    On Error GoTo ErrH
+    'your code here
+    Dim transformer As NotesXSLTransformer, ses As New NotesSession
+    Dim strmXML As NotesStream, strmXSL As NotesStream, res As NotesStream
+    Set strmXML=ses.Createstream():Set strmXSL=ses.Createstream():Set res=ses.CreateStream()
+    If DataType(xml)=V_STRING Then
+        strmXML.writetext(xml)
+    Else
+        Set strmXML=xml
+    End If
+    strmXSL.Writetext(xsl)
+    Set transformer=ses.CreateXSLTransformer(strmXML, strmXSL, res)
+    transformer.Inputvalidationoption=False
+    Call transformer.Process()
+    res.Position=0
+    Do
+        Transform=Transform &amp; res.Readtext()
+    Loop Until res.isEOS
+Quit:
+    Exit Function
+ErrH:
+    MsgBox transformer.Log
+    Error Err, RaiseError
+    Resume Quit
+End Function
+</lotusscript>
+</code>
+</agent>

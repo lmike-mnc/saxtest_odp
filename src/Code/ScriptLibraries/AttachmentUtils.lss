@@ -1,0 +1,223 @@
+'++LotusScript Development Environment:2:5:(Options):0:74
+Option Public
+Option Declare
+Use "CommonUI.lib"
+
+'++LotusScript Development Environment:2:5:(Forward):0:1
+Declare Sub Initialize
+Declare Function AddAttachment(fName As String, objdoc As NotesDocument, xField As String) As NotesEmbeddedObject
+Declare Function DetachFiles(objdoc As NotesDocument, fld As String, filter As String, filesList List As String) As String
+Declare Function AttachmentsName(objdoc As NotesDocument) As Variant
+Declare Function RemoveAttachments(objdoc As NotesDocument, fld As String) As NotesRichTextItem
+Declare Function SaveStream(stream As NotesStream, path As String, cp As String) As Boolean
+Declare Function GetNotesTempDirectory() As String
+Declare Function HasAttachmentName(objdoc As NotesDocument, wildcard As String) As Boolean
+
+'++LotusScript Development Environment:2:5:(Declarations):0:10
+'/*лицензия LGPL
+'автор: Чолоков М. Н.
+'*/
+Const ERR_UNSUPPORTED_PLATFORM = 20300 ' arbitrary value
+Private CodePage As String
+'Private agentLog As NotesLog
+Declare Function w32_OSGetSystemTempDirectory Lib "nnotes" Alias "OSGetSystemTempDirectory" ( ByVal S As String) As Integer
+Declare Function mac_OSGetSystemTempDirectory Lib "NotesLib" Alias "OSGetSystemTempDirectory" ( ByVal S As String) As Integer
+Declare Function linux_OSGetSystemTempDirectory Lib "libnotes.so" Alias "OSGetSystemTempDirectory" ( ByVal S As String) As Integer
+
+'++LotusScript Development Environment:2:2:Initialize:1:10
+Sub Initialize
+	CodePage="UTF-8"
+End Sub
+
+'++LotusScript Development Environment:2:1:AddAttachment:1:8
+Function AddAttachment(fName As String, objdoc As NotesDocument, xField As String) As NotesEmbeddedObject
+	Dim rtItem As NotesRichTextItem
+	On Error Goto ErrorHandler
+	Set rtItem=objdoc.GetFirstItem(xField)
+	Set AddAttachment=rtItem.EmbedObject(EMBED_ATTACHMENT, "", fName)
+ExitFunction:
+	Exit Function
+errorhandler:
+	Call RaiseError()
+	Resume ExitFunction
+End Function
+
+'++LotusScript Development Environment:2:1:DetachFiles:2:8
+'Return last detached file name, write list of detached files
+Function DetachFiles(objdoc As NotesDocument, fld As String, filter As String, filesList List As String) As String
+	Dim file As String, path As String
+	Dim rtItem As NotesRichTextItem
+	Dim docItem As NotesItem
+	
+	On Error Goto ErrorHandler
+	Erase filesList
+	Set docItem=objdoc.GetFirstItem(fld)
+	If Not docItem Is Nothing Then
+		DbgMsg("RichText:" & Cstr(docItem.Type = RICHTEXT))
+		If docItem.Type=RICHTEXT Then
+			Set rtItem=docItem
+		End If
+	End If
+	
+	path=GetNotesTempDirectory()
+	file=""
+	If objdoc.Hasembedded Then	
+		If ( Not rtItem Is Nothing ) Then
+			If (Not Isempty(rtitem.EmbeddedObjects))Then
+				Forall o In rtitem.EmbeddedObjects 
+					Dim detach As Boolean
+					detach=True
+					If (filter<>"") Then
+						If Not (Lcase(o.Name) Like filter) Then
+							detach=False
+						End If
+					End If
+					If detach Then
+						file=o.Name
+						filesList(file)=path
+						Call o.ExtractFile(path & file)
+					End If
+				End Forall 
+			End If
+		End If			
+	End If
+	If file<>"" Then DetachFiles=path & file
+ExitFunction:
+	Exit Function
+ErrorHandler:
+	Call RaiseError()
+	Erase filesList
+	Resume ExitFunction
+End Function
+
+
+'++LotusScript Development Environment:2:1:AttachmentsName:1:8
+Function AttachmentsName(objdoc As NotesDocument) As Variant
+    AttachmentsName=Evaluate("@AttachmentNames(0)", objdoc)
+End Function
+
+'++LotusScript Development Environment:2:1:RemoveAttachments:1:8
+Function RemoveAttachments(objdoc As NotesDocument, fld As String) As NotesRichTextItem
+	Dim rtItem As NotesRichTextItem
+	Dim docItem As NotesItem
+	
+	On Error Goto errorhandler
+	Set docItem=objdoc.GetFirstItem(fld)
+	If Not docItem Is Nothing Then
+		DbgMsg("RichText:" & Cstr(docItem.Type = RICHTEXT))
+		If docItem.Type=RICHTEXT Then
+			Set rtItem=docItem
+		End If
+	End If
+	If objdoc.Hasembedded Then	
+		If ( Not rtItem Is Nothing ) Then
+			If (Not Isempty(rtitem.EmbeddedObjects))Then
+				Forall o In rtitem.EmbeddedObjects 
+					Call o.Remove
+					DbgMsg("RT field: remove attachments")
+				End Forall 
+			End If
+		Else
+			If ( Not Isempty(objdoc.EmbeddedObjects)) Then
+				Forall o In objdoc.EmbeddedObjects
+					Call o.Remove
+					DbgMsg("remove attachments")
+				End Forall
+			End If
+		End If
+	End If
+	'If (rtItem Is Nothing) Then rtitem.Update
+	Do While Not objdoc.GetFirstItem("$FILE") Is Nothing
+		objdoc.RemoveItem("$FILE")
+		DbgMsg("remove fields: $FILE")
+	Loop
+	
+	If (rtItem Is Nothing) Then
+		Do While Not objdoc.GetFirstItem(fld) Is Nothing
+			objdoc.RemoveItem(fld)
+			DbgMsg("Remove non RT fields:" & fld)
+		Loop
+		Set rtItem=objdoc.CreateRichTextItem(fld)
+		Call objdoc.Save(True,False)
+	End If
+	Set RemoveAttachments=rtItem
+ExitFunction:
+	Exit Function
+errorhandler:
+	Call RaiseError()
+	Resume ExitFunction
+End Function
+
+'++LotusScript Development Environment:2:1:SaveStream:1:8
+Function SaveStream(stream As NotesStream, path As String, cp As String) As Boolean
+	On Error Goto errorhandler
+	Dim ses As New NotesSession
+	Dim fileStream As NotesStream
+	Set fileStream=ses.CreateStream
+	If cp="" Then cp=CodePage
+	If fileStream.Open(path,cp) Then
+		If Not stream.IsReadOnly Then
+			fileStream.Position=0
+			Call fileStream.Truncate()
+			stream.Position=0
+			Dim buffer As String
+			Do
+				buffer = stream.ReadText()
+				Call fileStream.WriteText(buffer)
+			Loop Until stream.IsEOS
+			Call stream.Close()
+			Call fileStream.Close()
+			SaveStream=True
+		End If
+	Else
+		DbgMsg("bytes:"+Str(stream.Bytes)+ ":Stream openning Error")
+	End If
+ExitFunction:
+	Exit Function
+errorhandler:
+	Call RaiseError()
+	SaveStream=False
+	Resume ExitFunction
+End Function
+
+'++LotusScript Development Environment:2:1:GetNotesTempDirectory:1:8
+Function GetNotesTempDirectory() As String
+' Returns the path of the temporary directory used by Notes.
+' Not same as system or user temp dir that you can get e.g. with Environ("TEMP") in Windows.
+' Main reasons to use this instead: works crossplatform, and partitioned servers each need
+' their own temp dir to avoid interfering with each other.
+    Dim session As New NotesSession
+    Dim d As String * 256
+    Dim s%
+    Select Case session.Platform
+    Case "Linux"
+        s% = linux_OSGetSystemTempDirectory(d)
+    Case "Macintosh"
+        s% = mac_OSGetSystemTempDirectory(d)
+    Case "Windows/32"
+        s% = w32_OSGetSystemTempDirectory(d)
+    Case Else
+        Error ERR_UNSUPPORTED_PLATFORM, "In GetNotesTempDirectory, platform not supported: " & session.Platform
+    End Select
+    GetNotesTempDirectory = Left$(d, s%)
+End Function
+
+'++LotusScript Development Environment:2:1:HasAttachmentName:1:8
+Function HasAttachmentName(objdoc As NotesDocument, wildcard As String) As Boolean
+    Dim arr As Variant
+    arr=AttachmentsName(objdoc)
+    If Not IsEmpty(arr) Then
+        If IsArray(arr) Then
+            ForAll a In arr
+                If CStr(a) Like wildcard Then
+                    HasAttachmentName=True
+                    Exit Function
+                End If
+            End ForAll
+        Else
+            If CStr(arr) Like wildcard Then
+                HasAttachmentName=True
+            End If
+        End If
+    End If
+End Function

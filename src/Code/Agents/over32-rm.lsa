@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?><agent xmlns="http://www.lotus.com/dxl" name="over32-rm" hide="v3" publicaccess="false">
+<noteinfo unid="08D38069A5D2D08443257E680052E1EE"/>
+
+
+
+<trigger type="actionsmenu"/>
+<documentset type="runonce"/>
+<code event="options">
+<lotusscript>%REM
+*********************************************
+	Agent over32-rm
+	Created Jun 18, 2015 by Mikhail Cholokov/CRUINTERNET
+	Description: Comments for Agent
+%END REM
+Option Public
+Option Declare
+Use "Common.lib"
+
+</lotusscript>
+</code>
+<code event="initialize">
+<lotusscript>Sub Initialize
+    On Error GoTo ErrH
+    Debug=True
+    Dim NDC As NotesDocumentCollection
+    Set NDC=SelectedDocsUI
+    Dim ses As New NotesSession, stream As NotesStream
+    Dim db As NotesDatabase, doc As NotesDocument
+    Set db=ses.Currentdatabase
+    Dim cnt As Long
+    'On Error Resume Next
+    Set doc=NDC.Getfirstdocument()
+    Do While (Not doc Is Nothing)
+        Forall v In doc.Items
+            Dim item As NotesItem
+            Set item=v
+            Print {Item:}item.Name
+            If item.Name={over32} Then item.Issummary=False 
+        End ForAll
+        doc.Removeitem({over32})
+        Print {UNID:} doc.Universalid
+        Call doc.Save(true, False)
+        Set doc=NDC.Getnextdocument(doc)
+    Loop
+Quit:
+    Exit Sub
+ErrH:
+    Error Err,RaiseError
+End Sub</lotusscript>
+</code>
+</agent>

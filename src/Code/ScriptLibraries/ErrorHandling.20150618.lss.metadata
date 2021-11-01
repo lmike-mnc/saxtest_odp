@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?><note xmlns="http://www.lotus.com/dxl" class="filter">
+<noteinfo unid="AE8C58B0BE80F28043257E4C00366CD4"/>
+
+
+<item name="$Flags">
+<text>s34Q</text>
+</item>
+<item name="$PublicAccess" sign="true">
+<text>1</text>
+</item>
+
+<item name="$Comment" sign="true">
+<text>!обработчики ошибок</text>
+</item>
+
+
+<item name="$TITLE" sign="true">
+<text>ErrorHandling.20150618</text>
+</item>
+</note>

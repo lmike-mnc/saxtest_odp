@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?><scriptlibrary xmlns="http://www.lotus.com/dxl" name="VRMWebService" hide="v3 v4strict">
+<noteinfo unid="74EE49C679933F1D43257918002EB35D"/>
+
+<code event="library">
+<javaproject class="com/myvrm/www/webservices/VRMNewWebService.class">
+<java name="com/myvrm/www/webservices/VRMNewWebService.java">package com.myvrm.www.webservices;
+import lotus.domino.*;
+public interface VRMNewWebService extends javax.xml.rpc.Service {
+
+public java.lang.String getVRMNewWebServiceSoapAddress();
+
+public com.myvrm.www.webservices.VRMNewWebServiceSoap getVRMNewWebServiceSoap() throws javax.xml.rpc.ServiceException;
+
+public com.myvrm.www.webservices.VRMNewWebServiceSoap getVRMNewWebServiceSoap(java.net.URL portAddress) throws javax.xml.rpc.ServiceException;
+}
+
+class VRMNewWebServiceLocator extends lotus.domino.websvc.client.Service implements com.myvrm.www.webservices.VRMNewWebService {
+
+public VRMNewWebServiceLocator() {
+super("HttpWwwMyvrmComWebservicesVRMNewWebService");
+}
+
+// Use to get a proxy class for VRMNewWebServiceSoap
+private final java.lang.String VRMNewWebServiceSoap_address = "http://demo3.myvrm.com/en/myvrmws.asmx";
+
+public java.lang.String getVRMNewWebServiceSoapAddress() {
+return VRMNewWebServiceSoap_address;
+}
+
+// The WSDD service name defaults to the port name.
+private final java.lang.String VRMNewWebServiceSoapWSDDServiceName = "VRMNewWebService.VRMNewWebServiceSoap";
+
+public com.myvrm.www.webservices.VRMNewWebServiceSoap getVRMNewWebServiceSoap() throws javax.xml.rpc.ServiceException {
+java.net.URL endpoint;
+try {
+endpoint = new java.net.URL(VRMNewWebServiceSoap_address);
+}
+catch (java.net.MalformedURLException e) {
+throw new javax.xml.rpc.ServiceException(e);
+}
+return getVRMNewWebServiceSoap(endpoint);
+}
+
+public com.myvrm.www.webservices.VRMNewWebServiceSoap getVRMNewWebServiceSoap(java.net.URL portAddress) throws javax.xml.rpc.ServiceException {
+try {
+com.myvrm.www.webservices.VRMNewWebServiceSoapStub _stub = new com.myvrm.www.webservices.VRMNewWebServiceSoapStub(portAddress, this);
+_stub.setPortName(VRMNewWebServiceSoapWSDDServiceName);
+return _stub;
+}
+catch (lotus.domino.types.Fault e) {
+return null;
+}
+}
+
+/**
+* For the given interface, get the stub implementation.
+* If this service has no port for the given interface,
+* then ServiceException is thrown.
+*/
+public java.rmi.Remote getPort(Class serviceEndpointInterface) throws javax.xml.rpc.ServiceException {
+try {
+if (com.myvrm.www.webservices.VRMNewWebServiceSoap.class.isAssignableFrom(serviceEndpointInterface)) {
+com.myvrm.www.webservices.VRMNewWebServiceSoapStub _stub = new com.myvrm.www.webservices.VRMNewWebServiceSoapStub(new java.net.URL(VRMNewWebServiceSoap_address), this);
+_stub.setPortName(VRMNewWebServiceSoapWSDDServiceName);
+return _stub;
+}
+}
+catch (java.lang.Throwable t) {
+throw new javax.xml.rpc.ServiceException(t);
+}
+throw new javax.xml.rpc.ServiceException("There is no stub implementation for the interface: " + (serviceEndpointInterface == null ? "null" : serviceEndpointInterface.getName()));
+}
+
+/**
+* For the given interface, get the stub implementation.
+* If this service has no port for the given interface,
+* then ServiceException is thrown.
+*/
+public java.rmi.Remote getPort(javax.xml.namespace.QName portName, Class serviceEndpointInterface) throws javax.xml.rpc.ServiceException {
+if (portName == null) {
+return getPort(serviceEndpointInterface);
+}
+String inputPortName = portName.getLocalPart();
+if ("VRMNewWebServiceSoap".equals(inputPortName)) {
+return getVRMNewWebServiceSoap();
+}
+else {
+java.rmi.Remote _stub = getPort(serviceEndpointInterface);
+((lotus.domino.websvc.client.Stub) _stub).setPortName(portName);
+return _stub;
+}
+}
+
+public javax.xml.namespace.QName getServiceName() {
+return new javax.xml.namespace.QName("http://www.myvrm.com/webservices/", "VRMNewWebService");
+}
+
+private java.util.HashSet ports = null;
+
+public java.util.Iterator getPorts() {
+if (ports == null) {
+ports = new java.util.HashSet();
+ports.add(new javax.xml.namespace.QName("VRMNewWebServiceSoap"));
+}
+return ports.iterator();
+}
+
+}
+interface VRMNewWebServiceSoap extends lotus.domino.types.PortTypeBase, java.rmi.Remote {
+public java.lang.String invokeWebservice(java.lang.String inputXML) throws java.rmi.RemoteException;
+}
+class VRMNewWebServiceSoapStub extends lotus.domino.websvc.client.Stub implements com.myvrm.www.webservices.VRMNewWebServiceSoap {
+
+public VRMNewWebServiceSoapStub(java.net.URL endpointURL, javax.xml.rpc.Service service) throws lotus.domino.types.Fault {
+super(endpointURL, service);
+}
+
+public java.lang.String invokeWebservice(java.lang.String inputXML) throws java.rmi.RemoteException {
+lotus.domino.websvc.client.Call _call = createCall("invokeWebservice");
+java.lang.Object _resp = _call.invoke(new java.lang.Object[] {inputXML});
+return (java.lang.String) _call.convert(_resp, java.lang.String.class);
+}
+
+}</java>
+</javaproject>
+</code>
+</scriptlibrary>

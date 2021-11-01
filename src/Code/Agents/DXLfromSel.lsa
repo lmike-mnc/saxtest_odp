@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?><agent xmlns="http://www.lotus.com/dxl" name="DXLfromSel" hide="v3" publicaccess="false">
+<noteinfo unid="461C5C5C3B4E41E143257E68004F73F4"/>
+
+
+
+<trigger type="actionsmenu"/>
+<documentset type="runonce"/>
+<code event="options">
+<lotusscript>%REM
+*********************************************
+	Agent DXLfromSel
+	Created Jun 18, 2015 by Mikhail Cholokov/CRUINTERNET
+	Description: Comments for Agent
+%END REM
+Option Public
+Option Declare
+Use "Common.lib"
+
+
+</lotusscript>
+</code>
+<code event="initialize">
+<lotusscript>Sub Initialize
+    On Error GoTo ErrH
+    Debug=true
+    Dim NDC As NotesDocumentCollection
+    Set NDC=SelectedDocsUI
+    Dim ses As New NotesSession, stream As NotesStream
+    Dim db As NotesDatabase
+    Set db=ses.Currentdatabase
+    Set stream=ses.Createstream()
+    stream.Open({/dxl.xml})
+    Dim dxl As NotesDXLExporter
+    Set dxl=ses.Createdxlexporter()
+    Call dxl.SetOutput(stream)
+    Call dxl.Setinput(NDC)
+    'Call dxl.Setinput(db)
+    dxl.Exitonfirstfatalerror=False
+    Call dxl.Process()
+Quit:
+    Exit Sub
+ErrH:
+    If Not dxl Is Nothing Then
+        If Len(dxl.Log)&gt;0 Then MsgBox dxl.Log
+    End If
+    Error Err,RaiseError
+End Sub</lotusscript>
+</code>
+</agent>

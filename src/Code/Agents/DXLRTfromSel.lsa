@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?><agent xmlns="http://www.lotus.com/dxl" name="DXLRTfromSel" hide="v3" publicaccess="false">
+<noteinfo unid="4EAD8B50385E796A43257F4C003C2817"/>
+
+
+
+<trigger type="actionsmenu"/>
+<documentset type="runonce"/>
+<code event="options">
+<lotusscript>%REM
+*********************************************
+	Agent DXLfromSel
+	Created Jun 18, 2015 by Mikhail Cholokov/CRUINTERNET
+	Description: Comments for Agent
+%END REM
+Option Public
+Option Declare
+Use "Common.lib"
+
+
+</lotusscript>
+</code>
+<code event="initialize">
+<lotusscript>Sub Initialize
+    On Error GoTo ErrH
+    Debug=true
+    Dim NDC As NotesDocumentCollection
+    Set NDC=SelectedDocsUI
+    Dim ses As New NotesSession, stream As NotesStream
+    Dim db As NotesDatabase
+    Set db=ses.Currentdatabase
+    Set stream=ses.Createstream()
+    stream.Open({/rt.xml})
+    Dim dxl As NotesDXLExporter
+    Set dxl=ses.Createdxlexporter()
+    Call dxl.SetOutput(stream)
+    Dim doc As NotesDocument
+    Set doc=NDC.Getfirstdocument()
+    Dim rt As NotesRichTextItem
+    Set rt=doc.Getfirstitem({body})
+    dxl.Richtextoption=RICHTEXTOPTION_DXL
+    Call dxl.Setinput(rt)
+    'Call dxl.Setinput(db)
+    dxl.Exitonfirstfatalerror=False
+    Call dxl.Process()
+Quit:
+    Exit Sub
+ErrH:
+    If Not dxl Is Nothing Then
+        If Len(dxl.Log)&gt;0 Then MsgBox dxl.Log
+    End If
+    Error Err,RaiseError
+End Sub</lotusscript>
+</code>
+</agent>

@@ -1,0 +1,123 @@
+'++LotusScript Development Environment:2:5:(Options):0:74
+Option Public
+Option Declare
+Use "ErrorHandling"
+
+'++LotusScript Development Environment:2:5:(Forward):0:1
+Declare Sub Initialize
+Declare Function DocWithUNID(unid As String) As NotesDocument
+Declare Function DebugPrint(msg As String) As String
+Declare Function SelectedDocsUI() As NotesDocumentCollection
+Declare Function GetDocumentByUNIDSilent(db As NotesDatabase, UNID As String) As NotesDocument
+
+'++LotusScript Development Environment:2:5:(Declarations):0:10
+Private ses As NotesSession
+Private db As NotesDatabase
+Private wks As NotesUIWorkspace
+Private Const CM_WRONGUNID={Некорректный UNID:}
+
+'++LotusScript Development Environment:2:2:Initialize:1:10
+Sub Initialize
+	Set ses=New NotesSession
+	Set wks=New NotesUIWorkspace
+	Set db=ses.CurrentDatabase
+End Sub
+
+'++LotusScript Development Environment:2:1:DocWithUNID:6:8
+%REM
+*--------------------------------------------
+	Function DocWithUNID
+	Description: Comments for Function
+%END REM
+Function DocWithUNID(unid As String) As NotesDocument
+	Dim routineName As String
+	routineName="DocWithUNID"
+	On Error GoTo ErrH
+'your code here
+	Dim ses As New NotesSession, db As NotesDatabase
+	Set db=ses.Currentdatabase
+	If Len(unid)<>32 Then Error 1024, CM_WRONGUNID &unid
+	Dim doc As NotesDocument
+	Set doc=db.Getdocumentbyunid(unid)
+	If Not doc Is Nothing Then doc.Removepermanently(True)
+	Set doc=db.Createdocument()
+	doc.Universalid=unid
+	Call doc.save(True, False)
+	Set DocWithUNID=doc
+Quit:
+	Exit Function
+ErrH:
+	Error Err, RaiseError
+	Resume Quit
+End Function
+
+'++LotusScript Development Environment:2:1:DebugPrint:6:8
+%REM
+*--------------------------------------------
+	Function DebugPrint
+	Description: Comments for Function
+%END REM
+Function DebugPrint(msg As String) As String
+	Dim routineName As String
+	routineName="DebugPrint"
+	On Error GoTo ErrH
+'your code here
+	msg=GetThreadInfo(LSI_THREAD_CALLPROC) &{;} &msg
+	Print msg
+	DebugPrint=msg
+Quit:
+	Exit Function
+ErrH:
+	Error Err, RaiseError
+	Resume Quit
+End Function
+
+
+'++LotusScript Development Environment:2:1:SelectedDocsUI:1:8
+Function SelectedDocsUI() As NotesDocumentCollection
+	On Error Goto ErrH
+	Dim uiview As NotesUIView
+	Dim doc As NotesDocument, NDC As NotesDocumentCollection
+	Set uiview=wks.CurrentView
+	If Not uiview Is Nothing Then
+		Set NDC=uiview.Documents
+		DbgMsg {Selected in view:}& Cstr(NDC.Count)
+		Set doc=NDC.GetFirstDocument
+		If doc Is Nothing Then
+'			Set NDC= db.CreateDocumentCollection
+			Set doc=db.GetDocumentByID(uiview.CaretNoteID)
+			If doc Is Nothing Then Exit Function
+			Call NDC.AddDocument(doc)
+			Set doc=NDC.GetFirstDocument
+		End If
+	Else
+		Set NDC= db.CreateDocumentCollection
+		Set doc=ses.DocumentContext
+		If Not doc Is Nothing Then Call NDC.AddDocument(doc)
+	End If
+	Set SelectedDocsUI=NDC
+Quit:
+	Exit Function
+ErrH:
+	RaiseError
+	Resume Quit
+End Function
+
+
+'++LotusScript Development Environment:2:1:GetDocumentByUNIDSilent:1:8
+Function GetDocumentByUNIDSilent(db As NotesDatabase, UNID As String) As NotesDocument
+    On Error GoTo ErrH
+    Dim doc As NotesDocument
+    Set doc = db.GetDocumentByUNID(UNID)
+    If doc.IsValid And Not doc.IsDeleted Then
+        'проверка - если, например, недоступен по readers
+        If doc.Size > 0 Then
+            Set GetDocumentByUNIDSilent = doc
+        End If
+    End If    
+Quit:
+    Exit Function
+ErrH:
+'   RaiseError
+    Resume Quit
+End Function

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?><agent xmlns="http://www.lotus.com/dxl" name="exportRTF" hide="v3" publicaccess="false">
+<noteinfo unid="52B926639EE212A643257F4C00487141"/>
+
+
+
+<trigger type="actionsmenu"/>
+<documentset type="selected"/>
+<code event="action">
+<javaproject class="JavaAgent.class">
+<java name="JavaAgent.java">import lotus.domino.*;
+
+public class JavaAgent extends AgentBase {
+
+    public void NotesMain() {
+
+      try {
+          Session session = getSession();
+          AgentContext agentContext = session.getAgentContext();
+          // (Your code goes here)
+          Document doc=agentContext.getDocumentContext();
+          RichTextItem rt=(RichTextItem)doc.getFirstItem("body");
+          org.w3c.dom.Document domdoc = rt.parseXML(false);
+          domdoc.getTextContent();
+      } catch(Exception e) {
+          e.printStackTrace();
+       }
+   }
+}</java>
+</javaproject>
+</code>
+
+<item name="$JavaCompilerSource">
+<text>1.6</text>
+</item>
+<item name="$JavaCompilerTarget">
+<text>1.6</text>
+</item>
+</agent>

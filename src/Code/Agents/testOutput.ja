@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?><agent xmlns="http://www.lotus.com/dxl" name="testOutput" hide="v3" publicaccess="false">
+<noteinfo unid="311D2FA6DED3D543C32570F8003D121C"/>
+
+
+
+<trigger type="actionsmenu"/>
+<documentset type="runonce"/>
+<code event="action">
+<javaproject class="JavaAgent.class">
+<java name="JavaAgent.java">import lotus.domino.*;
+import java.lang.reflect.*;
+import java.io.*;
+import java.util.*;
+import lotus.notes.internal.*;
+
+public class JavaAgent extends AgentBase {
+	public void NotesMain() {
+
+		try {
+			Session session = getSession();
+			AgentContext agentContext = session.getAgentContext();
+			
+			// (Your code goes here) 
+			SecurityManager sm = System.getSecurityManager();
+			Class clazz=this.getClass().getSuperclass();
+			Field[] v = clazz.getDeclaredFields();
+//			Enumeration e = v.elements();
+//			if (e.hasMoreElements()){}
+
+			PrintWriter pw=getAgentOutput();
+//			pw.println(((AgentInfo)f.get(this)).toString());
+//System.err.println("test");
+pw.println("test2");
+pw.flush();
+
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
+}
+
+</java>
+<java name="newAgentOutput.java">import lotus.notes.internal.*;
+
+import java.io.*;
+
+public class newAgentOutput
+{
+	
+}
+</java>
+</javaproject>
+</code>
+</agent>

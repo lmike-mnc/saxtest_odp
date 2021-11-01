@@ -1,0 +1,69 @@
+'++LotusScript Development Environment:2:5:(Options):0:74
+%REM
+*********************************************
+	Library CommonUI.lib
+	Created Jul 13, 2015 by Mikhail Cholokov/CRUINTERNET
+	Description: Comments for Library
+%END REM
+Option Public
+Option Declare
+Use "Common.lib"
+
+'++LotusScript Development Environment:2:5:(Forward):0:1
+Declare Function UpdateUIdoc(uidoc As NotesUIDocument, rtName As String) As NotesUIDocument
+
+'++LotusScript Development Environment:2:5:(Declarations):0:2
+
+'++LotusScript Development Environment:2:1:UpdateUIdoc:6:8
+%REM
+*--------------------------------------------
+	Function UpdateUIdoc
+	Description: Comments for Function
+%END REM
+Function UpdateUIdoc(uidoc As NotesUIDocument, rtName As String) As NotesUIDocument
+	Dim routineName As String
+	routineName="UpdateUIdoc"
+	On Error GoTo ErrH
+'your code here
+    Dim wksp As New NotesUIWorkspace
+    Dim ses As New NotesSession
+    Dim uidocNew As NotesUIDocument
+    Dim doc As NotesDocument
+    Dim rti As NotesRichTextItem
+    Dim strFieldname As String
+
+    uidoc.Refresh True ' do this if the rich text field is editable, to get the current contents in case user has modified them.
+    Set doc = uidoc.Document  ' get the back-end document for the document open on screen.
+    strFieldname = uidoc.CurrentField ' remember the current field if any
+    Set rti = doc.GetFirstItem(rtName)
+    rti.Update
+    Dim newdoc As NotesDocument, unid As String
+    unid=doc.Universalid
+    Set newdoc=ses.Currentdatabase.Createdocument()
+    Call doc.Copyallitems(newdoc, True) 
+    doc.SaveOptions = "0" ' In order to close the document without a "do you want to save" prompt. If this is a mail-in doc you may need to set MailOptions="0" also to avoid being prompted.
+    Call uidoc.Close(True)
+    Dim isnew As Boolean
+    isnew=doc.Isnewnote
+    Delete uidoc 'Kill inmemory objects
+    If Not isnew Then
+        Set doc=GetDocumentByUNIDSilent(ses.Currentdatabase,unid)
+        ForAll itm In doc.Items
+            Dim tmp As NotesItem
+            Set tmp=itm
+            Call tmp.Remove()
+        End ForAll
+        Call newdoc.Copyallitems(doc,True)
+    Else
+        Set doc=newdoc
+    End If
+        
+    Set uidocNew = wksp.EditDocument(True, doc, , , , True)
+    If Len(strFieldname) > 0 Then uidocNew.GotoField(strFieldname) 
+	Set UpdateUIdoc=uidocNew
+Quit:
+	Exit Function
+ErrH:
+	Error Err, RaiseError
+	Resume Quit
+End Function
